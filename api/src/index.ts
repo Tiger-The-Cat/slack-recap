@@ -9,7 +9,7 @@ export const bot = new App({
   customRoutes: [
     {
       path: "/api/src/index",
-      method: ["GET"],
+      method: ["GET", "POST"],
       handler: (req, res) => {
         res.writeHead(200);
         res.end(`Things are going just fine at ${req.headers.host}!`);
