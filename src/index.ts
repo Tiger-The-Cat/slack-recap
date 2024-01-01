@@ -22,16 +22,19 @@ export const bot = new App({
       path: "/api/data/:id",
       method: ["GET"],
       async handler(req, res) {
+        const id = req.params!.id;
+        let data: RecapData | null = null;
         try {
-          const id = req.params!.id;
-          let data: RecapData | null = null;
-          try {
-            data = require(`../data/${id}.json`);
-          } catch {}
-          if (data) {
-            res.writeHead(200);
-            res.end(JSON.stringify(data));
-            return;
+          if (!req.url?.endsWith("?noCache")) {
+            //somehow the only way to get this? :(
+            try {
+              data = require(`../data/${id}.json`);
+            } catch {}
+            if (data) {
+              res.writeHead(200);
+              res.end(JSON.stringify(data));
+              return;
+            }
           }
           data = await collectData(id);
           writeFileSync(
@@ -58,7 +61,7 @@ bot.event("app_mention", async ({ event, client }) => {
   });
 });
 
-bot.command("/slack-recap", async ({ command, ack, respond }) => {
+bot.command(env.COMMAND, async ({ command, ack, respond }) => {
   await ack();
   const data = await getData(command.user_id, respond);
   if (!data) return;
