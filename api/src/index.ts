@@ -8,7 +8,7 @@ export const bot = new App({
   signingSecret: env.SLACK_SIGNING_SECRET,
   customRoutes: [
     {
-      path: "/api/src/index",
+      path: "/",
       method: ["GET"],
       handler: (req, res) => {
         res.writeHead(200);
