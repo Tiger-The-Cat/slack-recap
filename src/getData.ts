@@ -2,6 +2,7 @@ import { RespondFn } from "@slack/bolt";
 import { bot } from ".";
 import { writeFileSync } from "fs";
 import path from "path";
+import { RecapData } from "./data";
 
 const gettingData = new Map<string, boolean>();
 
@@ -23,11 +24,9 @@ const getData = async (id: string, respond: RespondFn) => {
       text: "I'm gonna have to collect some data for you first! Give me a minute...",
     });
     gettingData.set(id, true);
-    //Actual data collection down here 👇
 
-    const user = await bot.client.users.info({ user: id });
+    data = await collectData(id);
 
-    data = { id, name: user.user?.name ?? "Somebody" };
     writeFileSync(
       path.join(__dirname, `../data/${id}.json`),
       JSON.stringify(data)
@@ -42,3 +41,13 @@ const getData = async (id: string, respond: RespondFn) => {
   }
 };
 export default getData;
+
+export const collectData = async (id: string) => {
+  let data: RecapData | null = null;
+
+  const user = await bot.client.users.info({ user: id });
+  if (!user.user) throw new Error("User not found!");
+
+  data = { id, profile: user.user };
+  return data;
+};

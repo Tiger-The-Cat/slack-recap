@@ -1,7 +1,10 @@
 console.log("starting!");
 import { App } from "@slack/bolt";
 import env from "./utils/env";
-import getData from "./getData";
+import getData, { collectData } from "./getData";
+import { RecapData } from "./data";
+import { writeFileSync } from "fs";
+import path from "path";
 
 export const bot = new App({
   token: env.SLACK_TOKEN,
@@ -13,6 +16,35 @@ export const bot = new App({
       handler: (req, res) => {
         res.writeHead(200);
         res.end(`Things are going just fine at ${req.headers.host}!`);
+      },
+    },
+    {
+      path: "/api/data/:id",
+      method: ["GET"],
+      async handler(req, res) {
+        try {
+          const id = req.params!.id;
+          let data: RecapData | null = null;
+          try {
+            data = require(`../data/${id}.json`);
+          } catch {}
+          if (data) {
+            res.writeHead(200);
+            res.end(JSON.stringify(data));
+            return;
+          }
+          data = await collectData(id);
+          writeFileSync(
+            path.join(__dirname, `../data/${id}.json`),
+            JSON.stringify(data)
+          );
+          res.writeHead(200);
+          res.end(JSON.stringify(data));
+        } catch (e) {
+          console.log(e);
+          res.writeHead(500);
+          res.end("Whoops, an error!\n" + e);
+        }
       },
     },
   ],
