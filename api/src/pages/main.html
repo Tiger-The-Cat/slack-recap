@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="index, follow" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2" />
+    <title>Slack Recap</title>
+    <meta
+      name="description"
+      content="Slack Recap"
+    />
+    <meta
+      name="keywords"
+      content="slack, recap"
+    />
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="INSERT RECAP URL HERE" />
+    <meta property="og:title" content="Slack Recap" />
+    <meta property="og:description" content="Slack Recap" />
+    <meta property="og:image" content="/thumb.png" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="INSERT RECAP URL HERE" />
+    <meta property="twitter:title" content="Slack Recap" />
+    <meta property="twitter:description" content="Slack Recap" />
+    <meta property="twitter:image" content="/thumb.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rowdies:wght@300&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com" content="text/javascript"></script>
+    <script src="https://unpkg.com/zdog@1/dist/zdog.dist.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  </head>
+  <body class="h-[100%] overflow-hidden">
+      <div class="bodyContainer w-full h-[100vh] flex justify-center justify-content-center items-center" style="background-color: #33d6a6">
+		<main class=""> 
+            <div class="flex justify-center h-full justify-content-center items-center">
+                <canvas class="zdog-canvas block hidden" width="500" height="500" style="margin:0 auto 0 auto"></canvas>
+                <div class="rounded overflow-hidden shadow-lg bg-white text-black h-[80vh] flex items-center animate__animated justify-center lg:min-w-[45vw] md:lg:min-w-[45vw] min-w-[100vw]" id="card">
+                    <div>
+                        <div class="w-[100%]" id="content">
+                            <div class="px-6 py-10 mx-20 text-[50px] text-center"> You did done good this year.</div>
+                            <div class="px-6 py-4 text-[45px] text-center text-grade" id="overview">Ready for an overview?</div>
+                            
+                        </div>
+                        <div class="mt-[50px] flex justify-center">				
+                            <button class="pushable" disabled="true" aria-disabled="true">
+                                <a class="shadow"></a>
+                                <a class="edge"></a>
+                                <a class="front no-underline text-[50px]" onclick="start()" id="boi">
+                                    Start!
+                                </a>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+		</main>
+	</div>
+
+    <script>
+        const setups = {
+            "messagesSent": `<div class="px-6 py-10 mx-20 text-[50px] text-center">Talker extraordinaire! 📢</div>
+                            <div class="px-6 py-4 text-[45px] text-center">You sent <span class="text-grade">{val}</span> messages this year.</div>`
+        };
+
+        let userStats = undefined;
+        // userStats = {{ stats }};
+        if (!userStats) {
+            userStats = {'messagesSent': 20, 'mostUsedWords': [['among', 10], ['us', 8]]};
+        }
+
+        const card = document.getElementById('card');
+        const content = document.getElementById('content');
+        let boi = document.getElementById('boi');
+        function anim(obj, name) {
+            console.log(obj.id+" add "+name);
+            obj.classList.add(name, 'animate__animated');
+            obj.addEventListener('animationend', () => {
+                console.log(obj.id+" remove "+name);
+                obj.classList.remove(name, 'animate__animated');
+            });
+            return true;
+        }
+        function cardAnim(name, extraFunc) {
+            return anim(card, name, extraFunc);
+        }
+
+        cardAnim('animate__fadeInLeft');
+
+        String.prototype.format = function() {
+            let formatted = this;
+            for (let i = 0; i < arguments.length; i++) {
+                let regexp = new RegExp('\\{'+i+'\\}', 'gi');
+                formatted = formatted.replace(regexp, arguments[i]);
+            }
+            return formatted;
+        };
+
+
+        function load() {
+            let uKeys = Object.keys(userStats);
+            let k = uKeys[0];
+            if (k in setups){
+                content.innerHTML = setups[k].replace("{val}", userStats[k]);
+            } else {
+                content.innerHTML = k+": "+userStats[k];
+            }
+            delete userStats[k];
+            if (uKeys.length-1 <= 0) {
+                boi.parentElement.parentElement.classList.add("hidden");
+            }
+        }
+        function start() {
+            boi.innerText = "Next";
+            boi.onclick = next;
+            next()
+        }
+        function next() {
+            load();
+            cardAnim('animate__fadeInLeft');
+        }
+    </script>
+
+    <script>
+        // create illo
+        let illo = new Zdog.Illustration({
+        // set canvas with selector
+        element: '.zdog-canvas',
+        dragRotate: true,
+        zoom: 2,
+        });
+
+        let box = new Zdog.Box({
+            addTo: illo,
+            width: 100,
+            height: 100,
+            depth: 100,
+            stroke: 1,
+            color: '#ec3750', // default face color
+            // leftFace: '#EA0',
+            // rightFace: '#E62',
+            // topFace: '#ED0',
+            // bottomFace: '#636',
+        });
+
+        let ribbonW = new Zdog.Box({
+            addTo: illo,
+            width: 35,
+            height: 101,
+            depth: 101,
+            stroke: 1,
+            color: '#f1c40f', // default face color
+            // leftFace: '#EA0',
+            // rightFace: '#E62',
+            // topFace: '#ED0',
+            // bottomFace: '#636',
+        });
+
+        ribbonW.leftFaceRect.remove();
+        ribbonW.rightFaceRect.remove();
+
+        let ribbonD = new Zdog.Box({
+            addTo: illo,
+            width: 101,
+            height: 101,
+            depth: 35,
+            stroke: 1,
+            color: '#f1c40f', // default face color
+            // leftFace: '#EA0',
+            // rightFace: '#E62',
+            // topFace: '#ED0',
+            // bottomFace: '#636',
+        });
+
+        ribbonD.frontFaceRect.remove();
+        ribbonD.rearFaceRect.remove();
+        
+        // let can = new Zdog.Cylinder({
+        // addTo: illo,
+        // diameter: 80,
+        // length: 120,
+        // stroke: false,
+        // color: '#C25',
+        // position: {y: -2},
+        // backface: '#E62',
+        // });
+        // can.frontBase.remove();
+        // can.rearBase.remove();
+
+        illo.rotate.x -= 0.3;
+
+        function animate() {
+        // rotate illo each frame
+        illo.rotate.y += 0.05;
+        illo.updateRenderGraph();
+        // animate next frame
+        requestAnimationFrame( animate );
+        }
+        // start animation
+        animate();
+    </script>
+  </body>
+</html> 
+<style>
+  :root {
+    --font-size-base: clamp(1rem, 0.34vw + 0.91rem, 1.19rem);
+    --font-size-lg: clamp(1.2rem, 0.7vw + 1.2rem, 1.5rem);
+    --font-size-xl: clamp(2.44rem, 2.38vw + 1.85rem, 3.75rem);
+
+    --color-text: hsl(12, 5%, 4%);
+    --color-bg: hsl(10, 21%, 95%);
+    --color-border: hsl(17, 24%, 90%);
+  }
+
+  html {
+    font-family: "Rowdies", sans-serif;
+    font-size: var(--font-size-base);
+    color: var(--color-text);
+    background-color: var(--color-bg);
+  }
+
+  body {
+    margin: 0;
+  }
+
+  :global(h1) {
+    font-size: var(--font-size-xl);
+  }
+
+  :global(h2) {
+    font-size: var(--font-size-lg);
+  }
+
+  :global(code) {
+    font-family: Menlo, Monaco, Lucida Console, Liberation Mono,
+      DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace,
+      Rowdies;
+  }
+
+  .titleContainer {
+		padding-top: 10vh;
+	}
+
+	body {
+		font-family: 'Rowdies', sans-serif;
+		--bs-body-font-size: 30px;
+		color: white;
+	}
+
+	main {
+		margin: auto;
+		padding: 1em;
+		max-width: 150ch;
+	}
+
+	@keyframes pulse {
+		0%,
+		100% {
+			background-position-y: 0%;
+		}
+		50% {
+			background-position-y: 80%;
+		}
+	}
+
+	.pushable {
+		position: relative;
+		border: none;
+		background: transparent;
+		padding: 0;
+		cursor: pointer;
+		outline-offset: 4px;
+		transition: filter 250ms;
+  	}
+  	.shadow {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		border-radius: 12px;
+		background: hsl(0deg 0% 0% / 0.25);
+		will-change: transform;
+		transform: translateY(2px);
+		transition:
+			transform
+			600ms
+			cubic-bezier(.3, .7, .4, 1);
+  	}
+  	.edge {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		border-radius: 12px;
+		background: #d33046;
+  	}
+  	.front {
+    	display: block;
+		position: relative;
+		padding: 12px 42px;
+		border-radius: 12px;
+		color: white;
+		background: #ec3750;
+		will-change: transform;
+		transform: translateY(-4px);
+		transition:
+			transform
+			600ms
+			cubic-bezier(.3, .7, .4, 1);
+	}
+	.pushable:hover {
+		filter: brightness(110%);
+	}
+	.pushable:hover .front {
+		transform: translateY(-6px);
+		transition:
+			transform
+			250ms
+			cubic-bezier(.3, .7, .4, 1.5);
+	}
+	.pushable:active .front {
+		transform: translateY(-2px);
+		transition: transform 34ms;
+	}
+	.pushable:hover .shadow {
+		transform: translateY(4px);
+		transition:
+			transform
+			250ms
+			cubic-bezier(.3, .7, .4, 1.5);
+	}
+	.pushable:active .shadow {
+		transform: translateY(1px);
+		transition: transform 34ms;
+	}
+	.pushable:focus:not(:focus-visible) {
+		outline: none;
+	}
+
+    .text-grade {
+        background: linear-gradient(15deg,#ff0000 10%,#00ff00);
+        background-clip: border-box;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+</style>
