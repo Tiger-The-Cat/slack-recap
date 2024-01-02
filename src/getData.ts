@@ -89,7 +89,7 @@ export const collectData = async (
       if (ts < "1704085200" && ts > "1672549200") {
         allMessages.push(match);
       }
-      if (ts < "1704085200") break;
+      if (ts < "1672549200") break;
     }
   }
 
@@ -102,9 +102,26 @@ export const collectData = async (
       wordCounts.set(word, (wordCounts.get(word) || 0) + 1);
     }
   }
-  // sort words
   const mostUsedWords = [...wordCounts.entries()].sort((a, b) => b[1] - a[1]);
-  mostUsedWords.length = Math.min(mostUsedWords.length, 20);
+  mostUsedWords.length = Math.min(mostUsedWords.length, 15);
+
+  const messagesInChannels = new Map<string, number>();
+  for (const message of allMessages) {
+    if (!message.channel) continue;
+    messagesInChannels.set(
+      message.channel.id!,
+      (messagesInChannels.get(message.channel.id ?? message.channel.id!) || 0) +
+        1
+    );
+  }
+  // get channel names from allChannels, if available, then sort by most messages
+  const mostUsedChannels = [...messagesInChannels.entries()]
+    .map((c) => {
+      const channel = allChannels.find((ch) => ch.id == c[0]);
+      return [channel?.name || c[0], c[1]] as [string, number];
+    })
+    .sort((a, b) => b[1] - a[1]);
+  mostUsedChannels.length = Math.min(mostUsedChannels.length, 15);
 
   const createdChannels = allChannels.filter((c) => {
     return (
@@ -117,6 +134,7 @@ export const collectData = async (
     profile: user.user,
     messagesSent: allMessages.length,
     mostUsedWords,
+    mostUsedChannels,
     createdChannels,
   };
   return data;

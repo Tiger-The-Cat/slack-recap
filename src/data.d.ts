@@ -6,5 +6,6 @@ declare type RecapData = {
   profile: User;
   messagesSent: number;
   mostUsedWords: [string, number][];
+  mostUsedChannels: [string, number][];
   createdChannels: Channel[];
 };
