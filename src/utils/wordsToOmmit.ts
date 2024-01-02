@@ -157,6 +157,10 @@ const wordsToOmit = [
   "not",
   "good",
   "get",
+  "as",
+  "ve",
+  "got",
+  "don",
 ];
 
 export default wordsToOmit;

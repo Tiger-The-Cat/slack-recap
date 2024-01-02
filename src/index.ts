@@ -5,6 +5,7 @@ import getData, { collectData } from "./getData";
 import { RecapData } from "./data";
 import { writeFileSync } from "fs";
 import path from "path";
+import allChannels, { getChannels } from "./utils/allChannels";
 
 export const bot = new App({
   token: env.SLACK_TOKEN,
@@ -50,8 +51,17 @@ export const bot = new App({
         }
       },
     },
+    {
+      path: "/api/channels",
+      method: ["GET"],
+      handler(req, res) {
+        res.writeHead(200);
+        res.end(JSON.stringify(allChannels));
+      },
+    },
   ],
 });
+getChannels();
 
 bot.event("app_mention", async ({ event, client }) => {
   client.reactions.add({

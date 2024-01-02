@@ -6,6 +6,7 @@ import path from "path";
 import { RecapData } from "./data";
 import env from "./utils/env";
 import wordsToOmit from "./utils/wordsToOmmit";
+import allChannels from "./utils/allChannels";
 
 const gettingData = new Map<string, boolean>();
 
@@ -45,7 +46,10 @@ const getData = async (id: string, respond: RespondFn) => {
 };
 export default getData;
 
-export const collectData = async (id: string) => {
+export const collectData = async (
+  id: string,
+  userToken = env.SLACK_USER_TOKEN // somehow, let's let people use their own token and get private data! plus bypass rate limits
+) => {
   let data: RecapData | null = null;
 
   const user = await bot.client.users.info({ user: id });
@@ -57,7 +61,7 @@ export const collectData = async (id: string) => {
     sort: "timestamp",
     sort_dir: "desc",
     count: 100,
-    token: env.SLACK_USER_TOKEN,
+    token: userToken,
   });
   if (!messagesPage1.messages?.matches) throw new Error("No messages found!");
   // loop through all pages, until reaching the last page or messages before 2023
@@ -85,6 +89,7 @@ export const collectData = async (id: string) => {
       if (ts < "1704085200" && ts > "1672549200") {
         allMessages.push(match);
       }
+      if (ts < "1704085200") break;
     }
   }
 
@@ -101,11 +106,18 @@ export const collectData = async (id: string) => {
   const mostUsedWords = [...wordCounts.entries()].sort((a, b) => b[1] - a[1]);
   mostUsedWords.length = Math.min(mostUsedWords.length, 20);
 
+  const createdChannels = allChannels.filter((c) => {
+    return (
+      c.creator == id && c.created! > 1672549200 && c.created! < 1704085200
+    );
+  });
+
   data = {
     id,
     profile: user.user,
     messagesSent: allMessages.length,
     mostUsedWords,
+    createdChannels,
   };
   return data;
 };
