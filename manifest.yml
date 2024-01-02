@@ -10,6 +10,8 @@ features:
       should_escape: false
 oauth_config:
   scopes:
+    user:
+      - search:read
     bot:
       - app_mentions:read
       - channels:read
