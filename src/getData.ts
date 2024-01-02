@@ -5,7 +5,7 @@ import { writeFileSync } from "fs";
 import path from "path";
 import { RecapData } from "./data";
 import env from "./utils/env";
-import wordsToOmit from "./utils/wordsToOmmit";
+import wordsToOmit from "./utils/wordsToOmit";
 import allChannels from "./utils/allChannels";
 
 const gettingData = new Map<string, boolean>();
