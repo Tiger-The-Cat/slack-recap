@@ -1,62 +1,30 @@
 console.log("starting!");
 import { App } from "@slack/bolt";
 import env from "./utils/env";
-import getData, { collectData } from "./getData";
-import { RecapData } from "./data";
-import { writeFileSync } from "fs";
-import path from "path";
+import getData from "./getData";
 import allChannels, { getChannels } from "./utils/allChannels";
+import cookieParser from "cookie-parser";
+import express from "express";
+import * as nunjucks from "nunjucks";
+
+const train = express(); // very intuitive naming i know
+train.use(cookieParser());
+
+nunjucks.configure("views", {
+  autoescape: true,
+  express: train,
+}); // we'll see if this works later...
 
 export const bot = new App({
   token: env.SLACK_TOKEN,
   signingSecret: env.SLACK_SIGNING_SECRET,
   customRoutes: [
     {
-      path: "/",
       method: ["GET"],
-      handler: (req, res) => {
+      path: "/",
+      handler: async (req, res) => {
         res.writeHead(200);
         res.end(`Things are going just fine at ${req.headers.host}!`);
-      },
-    },
-    {
-      path: "/api/data/:id",
-      method: ["GET"],
-      async handler(req, res) {
-        const id = req.params!.id;
-        let data: RecapData | null = null;
-        try {
-          if (!req.url?.endsWith("?noCache")) {
-            //somehow the only way to get this? :(
-            try {
-              data = require(`../data/${id}.json`);
-            } catch {}
-            if (data) {
-              res.writeHead(200);
-              res.end(JSON.stringify(data));
-              return;
-            }
-          }
-          data = await collectData(id);
-          writeFileSync(
-            path.join(__dirname, `../data/${id}.json`),
-            JSON.stringify(data)
-          );
-          res.writeHead(200);
-          res.end(JSON.stringify(data));
-        } catch (e) {
-          console.log(e);
-          res.writeHead(500);
-          res.end("Whoops, an error!\n" + e);
-        }
-      },
-    },
-    {
-      path: "/api/channels",
-      method: ["GET"],
-      handler(req, res) {
-        res.writeHead(200);
-        res.end(JSON.stringify(allChannels));
       },
     },
   ],
@@ -71,11 +39,21 @@ bot.event("app_mention", async ({ event, client }) => {
   });
 });
 
-bot.command(env.COMMAND, async ({ command, ack, respond }) => {
-  await ack();
-  const data = await getData(command.user_id, respond);
-  if (!data) return;
-  respond({ text: "Got your data!" });
+train.get("/", (req, res) => {
+  res.writeHead(200);
+  res.end(`Things are going just fine at ${req.headers.host}!`);
 });
 
-bot.start(3000);
+train.get("/debug/channels", async (req, res) => {
+  res.writeHead(200);
+  res.end(JSON.stringify(allChannels));
+});
+
+train.get("/data/:id", async (req, res) => {
+  const data = await getData(req.params.id);
+  res.status(200);
+  res.send(data);
+});
+
+bot.start(2300);
+train.listen(3000);

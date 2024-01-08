@@ -1,4 +1,3 @@
-import { RespondFn } from "@slack/bolt";
 import type { Match } from "@slack/web-api/dist/response/SearchMessagesResponse";
 import { bot } from ".";
 import { writeFileSync } from "fs";
@@ -8,26 +7,13 @@ import env from "./utils/env";
 import wordsToOmit from "./utils/wordsToOmit";
 import allChannels from "./utils/allChannels";
 
-const gettingData = new Map<string, boolean>();
-
-const getData = async (id: string, respond: RespondFn) => {
+const getData = async (id: string, noCache = false) => {
   try {
     let data: RecapData | null = null;
     try {
       data = require(`../data/${id}.json`);
     } catch {}
-    if (data) return data;
-    if (gettingData.get(id)) {
-      await respond({
-        text: "I'm still getting your data! This stuff isn't instant, y'know? Or maybe I errored out last time and I'm stuck, and in that case sorry.",
-      });
-      return null;
-    }
-
-    await respond({
-      text: "I'm gonna have to collect some data for you first! Give me a minute...",
-    });
-    gettingData.set(id, true);
+    if (data && !noCache) return data;
 
     data = await collectData(id);
 
@@ -35,12 +21,9 @@ const getData = async (id: string, respond: RespondFn) => {
       path.join(__dirname, `../data/${id}.json`),
       JSON.stringify(data)
     );
-    gettingData.set(id, false);
     return data;
   } catch (e) {
     console.log(e);
-    gettingData.set(id, false);
-    respond({ text: "Whoops, an error!\n" + e });
     return null;
   }
 };
